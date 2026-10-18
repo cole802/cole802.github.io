@@ -163,16 +163,57 @@
   }
   .kv span { color: var(--gold-bright); word-break: break-all; }
 
-  /* 传送门链接 */
-  .portals { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .6rem; margin-bottom: 1.2rem; }
-  .portals a {
-    display: block; padding: .7rem .9rem;
-    color: var(--parchment); text-decoration: none; font-size: .875rem;
-    background: linear-gradient(160deg, var(--stone-hi), var(--stone));
-    border: 1px solid var(--gold-dim);
-    transition: border-color .2s, color .2s;
+  /* 导航：过滤框 + 分类 + 卡片网格 */
+  [hidden] { display: none !important; }
+
+  .filter { margin-bottom: 1.6rem; }
+
+  .group { margin-bottom: 1.8rem; }
+  .group h2 {
+    font-family: var(--serif-cn); font-size: 1rem; font-weight: 500;
+    letter-spacing: .14em; color: var(--gold); margin: 0 0 .8rem;
   }
-  .portals a:hover { border-color: var(--gold); color: var(--gold-bright); }
+  .group h2::before {
+    content: ""; display: inline-block;
+    width: .35rem; height: .35rem; margin-right: .7rem;
+    rotate: 45deg; background: var(--gold-dim); vertical-align: middle;
+  }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .5rem; }
+
+  .card {
+    position: relative;
+    display: flex; align-items: center; gap: .6rem;
+    padding: .65rem .8rem;
+    color: var(--parchment); text-decoration: none;
+    font-size: .875rem; line-height: 1.3;
+    background: linear-gradient(160deg, var(--stone-hi), var(--stone));
+    border: 1px solid #39301f;
+    transition: border-color .2s, color .2s, box-shadow .2s;
+  }
+  .card:hover {
+    color: var(--gold-bright);
+    border-color: var(--gold);
+    box-shadow: inset 0 0 12px rgba(200, 164, 92, .14);
+  }
+  /* 左上角饰，hover 时才亮，避免整片网格太吵 */
+  .card::before {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: .4rem; height: .4rem;
+    border: 1px solid var(--gold); border-width: 1px 0 0 1px;
+    opacity: 0; transition: opacity .2s;
+  }
+  .card:hover::before { opacity: .6; }
+
+  .ico { flex: none; width: 1.15rem; height: 1.15rem; display: grid; place-items: center; }
+  .ico img { width: 100%; height: 100%; object-fit: contain; }
+  .ico .letter {
+    width: 100%; height: 100%;
+    display: grid; place-items: center;
+    font-family: var(--latin); font-size: .6rem;
+    color: var(--gold); border: 1px solid var(--gold-dim);
+  }
+  .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* 底部技能栏 */
   .bar {
@@ -251,7 +292,7 @@
 
 <header class="topbar">
   <span class="brand">WORKBENCH</span>
-  <span class="tip">Alt + 数字 切换工具　Esc 退出输入框</span>
+  <span class="tip">/ 过滤　Alt + 数字 切换　Esc 退出输入框</span>
   <span class="clock" id="clock"></span>
 </header>
 
@@ -351,7 +392,87 @@
 
   /* ---------- 工具 ---------- */
 
+  /* ====== 常用站点：改这里，然后 git push ======
+     每项是 ["显示名", "链接"]，分类顺序就是页面顺序 */
+  const LINKS = [
+    { group: "常用", items: [
+      ["GitHub", "https://github.com"],
+      ["Google", "https://www.google.com"],
+      ["V2EX", "https://v2ex.com"],
+      ["知乎", "https://www.zhihu.com"],
+      ["哔哩哔哩", "https://www.bilibili.com"],
+      ["YouTube", "https://www.youtube.com"],
+    ]},
+    { group: "开发", items: [
+      ["Stack Overflow", "https://stackoverflow.com"],
+      ["Maven Central", "https://central.sonatype.com"],
+      ["Docker Hub", "https://hub.docker.com"],
+      ["DevDocs", "https://devdocs.io"],
+      ["Regex101", "https://regex101.com"],
+      ["Crontab Guru", "https://crontab.guru"],
+    ]},
+    { group: "文档", items: [
+      ["Spring Boot", "https://docs.spring.io/spring-boot/index.html"],
+      ["MyBatis-Plus", "https://baomidou.com"],
+      ["MySQL", "https://dev.mysql.com/doc/"],
+      ["Redis", "https://redis.io/docs/latest/"],
+      ["Nginx", "https://nginx.org/en/docs/"],
+      ["Java 21 API", "https://docs.oracle.com/en/java/javase/21/docs/api/"],
+    ]},
+    { group: "AI", items: [
+      ["Claude", "https://claude.ai"],
+      ["ChatGPT", "https://chatgpt.com"],
+      ["Gemini", "https://gemini.google.com"],
+      ["DeepSeek", "https://chat.deepseek.com"],
+    ]},
+    { group: "云与部署", items: [
+      ["Cloudflare", "https://dash.cloudflare.com"],
+      ["GitHub Actions", "https://github.com/cole802?tab=repositories"],
+      ["阿里云", "https://www.aliyun.com"],
+      ["腾讯云", "https://cloud.tencent.com"],
+    ]},
+  ];
+
   const TOOLS = [
+    {
+      id: "home", name: "导航", hint: "按 / 过滤",
+      body: `<input type="text" class="filter" data-filter placeholder="过滤站点（/）" spellcheck="false">
+             <div data-groups></div>`,
+      init(root) {
+        const box = $("[data-groups]", root), filter = $("[data-filter]", root);
+
+        const card = (name, url) => {
+          let origin = "";
+          try { origin = new URL(url).origin; } catch { return ""; }
+          return `<a class="card" href="${escapeHtml(url)}" target="_blank" rel="noopener"
+                     data-q="${escapeHtml((name + " " + url).toLowerCase())}">
+                    <span class="ico"><img src="${escapeHtml(origin)}/favicon.ico" alt="" loading="lazy"></span>
+                    <span class="nm">${escapeHtml(name)}</span>
+                  </a>`;
+        };
+
+        box.innerHTML = LINKS.map(g =>
+          `<section class="group"><h2>${escapeHtml(g.group)}</h2>` +
+          `<div class="cards">${g.items.map(it => card(it[0], it[1])).join("")}</div></section>`
+        ).join("");
+
+        // 站点没有 /favicon.ico 时退回首字母
+        $$(".ico img", box).forEach(img => img.addEventListener("error", () => {
+          const span = document.createElement("span");
+          span.className = "letter";
+          span.textContent = (img.closest(".card").querySelector(".nm").textContent.trim()[0] || "?").toUpperCase();
+          img.replaceWith(span);
+        }, { once: true }));
+
+        filter.addEventListener("input", () => {
+          const q = filter.value.trim().toLowerCase();
+          $$(".card", box).forEach(c => { c.hidden = Boolean(q) && !c.dataset.q.includes(q); });
+          $$(".group", box).forEach(g => {
+            g.hidden = ![...g.querySelectorAll(".card")].some(c => !c.hidden);
+          });
+        });
+      },
+    },
     {
       id: "time", name: "时间戳", hint: "纯数字按时间戳，其余交给 Date",
       body: `<label class="field"><span>时间戳或日期</span><input type="text" data-in spellcheck="false" placeholder="1760000000 / 2026-10-17 14:30:00"></label>
@@ -507,38 +628,8 @@
         [pat, flags, text].forEach(e => e.addEventListener("input", run));
         pat.focus();
       },
-    },
-    {
-      id: "portal", name: "传送门", hint: "每行「名称 | 链接」，存在本机",
-      body: `<div class="portals" data-links></div>` +
-            field("清单", "textarea", 'data-edit spellcheck="false"') +
-            `<div class="row"><button data-save>保存</button><span class="note" data-msg></span></div>`,
-      init(root) {
-        const KEY = "portals";
-        const DEFAULT = [
-          "GitHub | https://github.com/cole802",
-          "Maven Central | https://central.sonatype.com",
-          "Spring Boot 文档 | https://docs.spring.io/spring-boot/index.html",
-          "MyBatis-Plus | https://baomidou.com",
-        ].join("\n");
-        const edit = $("[data-edit]", root), box = $("[data-links]", root), msg = $("[data-msg]", root);
-        const draw = src => {
-          box.innerHTML = src.split("\n").map(line => {
-            const [name, url] = line.split("|").map(s => s.trim());
-            if (!url || !/^https?:\/\//.test(url)) return "";
-            return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(name || url)}</a>`;
-          }).join("");
-        };
-        try { edit.value = localStorage.getItem(KEY) ?? DEFAULT; } catch { edit.value = DEFAULT; }
-        draw(edit.value);
-        $("[data-save]", root).addEventListener("click", () => {
-          try { localStorage.setItem(KEY, edit.value); msg.textContent = "已保存"; msg.className = "note ok"; }
-          catch { msg.textContent = "本机存储不可用"; msg.className = "note bad"; }
-          draw(edit.value);
-          setTimeout(() => (msg.textContent = ""), 1500);
-        });
-      },
-    },
+    }
+
   ];
 
   /* ---------- 切换与键盘 ---------- */
@@ -559,7 +650,6 @@
     tool.init?.(panel);
     stage.cleanup = panel.cleanup;
     $$(".slot", bar).forEach(s => s.setAttribute("aria-current", String(s.dataset.id === tool.id)));
-    try { localStorage.setItem("tool", tool.id); } catch {}
   }
 
   bar.addEventListener("click", e => {
@@ -570,6 +660,8 @@
   // 数字键直达：焦点在输入框时需加 Alt（用 e.code，避开 Alt 改写 e.key）；Esc 退出输入框
   addEventListener("keydown", e => {
     if (e.key === "Escape") { document.activeElement?.blur(); return; }
+    const inInput = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName);
+    if (e.key === "/" && !inInput) { $("[data-filter]")?.focus(); e.preventDefault(); return; }
     if (e.metaKey || e.ctrlKey) return;
     const m = /^Digit([1-9])$/.exec(e.code);
     if (!m || +m[1] > TOOLS.length) return;
@@ -579,9 +671,7 @@
     e.preventDefault();
   });
 
-  let saved = null;
-  try { saved = localStorage.getItem("tool"); } catch {}
-  open(saved ?? TOOLS[0].id);
+  open(TOOLS[0].id);
 
   /* ---------- 顶栏时钟 ---------- */
 
