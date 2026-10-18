@@ -79,7 +79,9 @@
     font-size: .75rem; letter-spacing: .34em;
     color: var(--gold);
   }
+  .tip { font-size: .75rem; color: var(--muted); margin-right: auto; }
   .clock { font-family: var(--mono); font-size: .8125rem; color: var(--muted); }
+  @media (max-width: 40rem) { .tip { display: none; } }
   .clock b { color: var(--parchment); font-weight: 400; }
 
   /* 主区 */
@@ -249,6 +251,7 @@
 
 <header class="topbar">
   <span class="brand">WORKBENCH</span>
+  <span class="tip">Alt + 数字 切换工具　Esc 退出输入框</span>
   <span class="clock" id="clock"></span>
 </header>
 
@@ -564,12 +567,16 @@
     if (slot) open(slot.dataset.id);
   });
 
-  // 数字键直达；正在输入时不抢键
+  // 数字键直达：焦点在输入框时需加 Alt（用 e.code，避开 Alt 改写 e.key）；Esc 退出输入框
   addEventListener("keydown", e => {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
-    const n = Number(e.key);
-    if (n >= 1 && n <= TOOLS.length) { open(TOOLS[n - 1].id); e.preventDefault(); }
+    if (e.key === "Escape") { document.activeElement?.blur(); return; }
+    if (e.metaKey || e.ctrlKey) return;
+    const m = /^Digit([1-9])$/.exec(e.code);
+    if (!m || +m[1] > TOOLS.length) return;
+    const inField = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName);
+    if (inField && !e.altKey) return;
+    open(TOOLS[+m[1] - 1].id);
+    e.preventDefault();
   });
 
   let saved = null;
