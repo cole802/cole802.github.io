@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>王云龙 — 后端工程师</title>
+<meta name="description" content="王云龙的个人主页：后端工程师，Java / Spring Boot。">
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --fg: #1c1b19;
+    --muted: #6b6760;
+    --line: #e4e0d8;
+    --accent: #b5533a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16151a;
+      --fg: #e9e6e1;
+      --muted: #938e86;
+      --line: #2c2a31;
+      --accent: #e0765a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 42rem; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
+  h1 { font-size: 2rem; letter-spacing: -0.02em; margin: 0 0 .4rem; }
+  h2 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--muted); font-weight: 600;
+    margin: 3.5rem 0 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--line);
+  }
+  .tagline { color: var(--muted); margin: 0 0 1.5rem; }
+  p { margin: 0 0 1rem; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: currentColor; }
+  ul { list-style: none; padding: 0; margin: 0; }
+
+  /* 技能标签 */
+  .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tags li {
+    font-size: .875rem; color: var(--muted);
+    padding: .2rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+  }
+
+  /* 项目列表 */
+  .projects li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+  .projects li:last-child { border-bottom: none; }
+  .projects h3 { font-size: 1rem; margin: 0 0 .25rem; font-weight: 600; }
+  .projects p { color: var(--muted); font-size: .9375rem; margin: 0; }
+
+  /* 联系方式 */
+  .links { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+  .links a { font-size: .9375rem; }
+
+  footer { margin-top: 5rem; color: var(--muted); font-size: .8125rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>王云龙</h1>
+  <p class="tagline">后端工程师 · Java / Spring Boot</p>
+
+  <h2>关于</h2>
+  <p>这里写两三句自我介绍：现在在做什么，擅长什么方向，对什么感兴趣。先占位，内容随时改。</p>
+
+  <h2>技能</h2>
+  <ul class="tags">
+    <li>Java</li>
+    <li>Spring Boot</li>
+    <li>MyBatis-Plus</li>
+    <li>MySQL</li>
+    <li>Redis</li>
+    <li>Docker</li>
+  </ul>
+
+  <h2>项目</h2>
+  <ul class="projects">
+    <li>
+      <h3>项目名称一</h3>
+      <p>一句话说清这个项目做什么、用了什么技术、你负责哪部分。</p>
+    </li>
+    <li>
+      <h3>项目名称二</h3>
+      <p>一句话说清这个项目做什么、用了什么技术、你负责哪部分。</p>
+    </li>
+  </ul>
+
+  <h2>联系</h2>
+  <div class="links">
+    <a href="https://github.com/cole802">GitHub</a>
+    <a href="mailto:wangyunlong000802@gmail.com">Email</a>
+  </div>
+
+  <footer>© 2026 王云龙</footer>
+</main>
+</body>
+</html>
