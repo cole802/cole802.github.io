@@ -3,331 +3,606 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>王云龙 — 后端工程师</title>
-<meta name="description" content="王云龙的个人主页：后端工程师，Java / Spring Boot。">
+<title>工作台</title>
+<meta name="description" content="常用开发小工具，键盘 1-9 直达。">
 <meta name="theme-color" content="#13100c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #13100c;          /* 最底层石色 */
-    --stone: #1b1610;        /* 面板底 */
-    --stone-hi: #241d14;     /* 面板高亮底 */
-    --gold: #c8a45c;         /* 主金 */
-    --gold-dim: #6e5a30;     /* 暗金，用于细边框 */
-    --gold-bright: #f2dca0;  /* 高光金 */
-    --parchment: #d9cfb6;    /* 正文 */
-    --muted: #9a8d73;        /* 次要文字 */
-    --epic: #a862e8;         /* 史诗紫，稀有强调 */
+    --ink: #13100c;
+    --stone: #1b1610;
+    --stone-hi: #241d14;
+    --gold: #c8a45c;
+    --gold-dim: #6e5a30;
+    --gold-bright: #f2dca0;
+    --parchment: #d9cfb6;
+    --muted: #9a8d73;
+    --ok: #4ec9a0;
+    --bad: #d2645a;
 
     --serif-cn: "Songti SC", "Noto Serif SC", "SimSun", serif;
     --sans-cn: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --latin: "Cinzel", serif;
   }
 
   * { box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+  html, body { height: 100%; }
 
   body {
     margin: 0;
+    display: flex;
+    flex-direction: column;
     color: var(--parchment);
-    font: 16px/1.9 var(--sans-cn);
-    -webkit-font-smoothing: antialiased;
+    font: 15px/1.7 var(--sans-cn);
     background-color: var(--ink);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* 石面颗粒：一张平铺的 SVG 噪声，静态不重绘 */
+  /* 石面颗粒 */
   body::before {
     content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: .05;
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  .wrap { position: relative; z-index: 1; }
-
-  a { color: var(--gold); text-decoration: none; }
-  a:hover { color: var(--gold-bright); }
-  :focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
-
-  /* ---------- 首屏：符文法阵 + 姓名 ---------- */
-  .hero {
-    position: relative;
-    min-height: 88vh;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    padding: 6rem 1.5rem 4rem;
-    overflow: hidden;
-  }
-
-  /* 首屏顶部的火光，只覆盖 hero，不跟随滚动 */
-  .hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% -5%, rgba(206, 142, 58, .22), transparent 62%);
-    pointer-events: none;
-  }
-
+  /* 背景法阵：退到最底层，只作氛围 */
   .sigil {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: min(78vw, 30rem);
+    position: fixed;
+    top: 46%; left: 50%;
+    width: min(96vw, 46rem);
     aspect-ratio: 1;
     translate: -50% -50%;
     color: var(--gold);
-    opacity: .3;
+    opacity: .12;
+    z-index: 0;
     pointer-events: none;
   }
-  .sigil .ring-out { animation: spin 150s linear infinite; transform-origin: 50% 50%; }
-  .sigil .ring-in  { animation: spin 90s linear infinite reverse; transform-origin: 50% 50%; }
+  .sigil .ring-out { animation: spin 180s linear infinite; transform-origin: 50% 50%; }
+  .sigil .ring-in  { animation: spin 120s linear infinite reverse; transform-origin: 50% 50%; }
   @keyframes spin { to { rotate: 360deg; } }
 
-  /* 法阵中心的余烬辉光，缓慢呼吸 */
-  .hero::after {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: min(70vw, 26rem); aspect-ratio: 1;
-    translate: -50% -50%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(214, 150, 66, .22), transparent 68%);
-    animation: breathe 7s ease-in-out infinite;
-    pointer-events: none;
-  }
-  @keyframes breathe { 50% { opacity: .45; } }
-
-  .hero-text { position: relative; z-index: 1; }
-
-  h1 {
-    font-family: var(--serif-cn);
-    font-size: clamp(3.2rem, 14vw, 5.5rem);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: .1em;
-    margin: 0;
-    color: var(--gold-bright);
-    text-shadow: 0 0 28px rgba(200, 164, 92, .35);
-  }
-
-  .latin {
-    font-family: var(--latin);
-    font-weight: 600;
-    font-size: .8rem;
-    letter-spacing: .42em;
-    color: var(--gold);
-    margin: 1.1rem 0 1.6rem;
-    padding-left: .42em; /* 补偿字距造成的右偏 */
-  }
-
-  .class-line { color: var(--muted); margin: 0; letter-spacing: .06em; }
-
-  /* ---------- 正文分区 ---------- */
-  main { max-width: 46rem; margin: 0 auto; padding: 0 1.5rem 7rem; }
-
-  section { margin-top: 5.5rem; }
-
-  h2 {
-    font-family: var(--serif-cn);
-    font-size: 1.45rem;
-    font-weight: 500;
-    letter-spacing: .14em;
-    color: var(--gold);
-    margin: 0 0 1.8rem;
-    padding-bottom: .9rem;
+  /* 顶栏 */
+  .topbar {
+    position: relative; z-index: 1;
+    flex: none;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: .9rem 1.3rem;
     border-bottom: 1px solid transparent;
-    /* 金线自左向右淡出 */
+    border-image: linear-gradient(90deg, var(--gold-dim), transparent 85%) 1;
+  }
+  .brand {
+    font-family: var(--latin); font-weight: 600;
+    font-size: .75rem; letter-spacing: .34em;
+    color: var(--gold);
+  }
+  .clock { font-family: var(--mono); font-size: .8125rem; color: var(--muted); }
+  .clock b { color: var(--parchment); font-weight: 400; }
+
+  /* 主区 */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 2rem 1.3rem 2.5rem;
+  }
+  .panel { max-width: 54rem; margin: 0 auto; }
+
+  .panel-head {
+    display: flex; align-items: center; gap: .8rem;
+    margin-bottom: 1.3rem;
+    padding-bottom: .8rem;
+    border-bottom: 1px solid transparent;
     border-image: linear-gradient(90deg, var(--gold-dim), transparent 75%) 1;
   }
-  /* 标题前的菱形符文 */
-  h2::before {
-    content: "";
-    display: inline-block;
-    width: .5rem; height: .5rem;
-    margin-right: .9rem;
-    rotate: 45deg;
-    background: var(--gold);
-    vertical-align: middle;
+  .panel-head h1 {
+    font-family: var(--serif-cn); font-size: 1.3rem; font-weight: 500;
+    letter-spacing: .12em; color: var(--gold); margin: 0;
   }
-
-  p { margin: 0 0 1rem; max-width: 38rem; }
-
-  /* ---------- 专精：天赋格子 ---------- */
-  .talents {
-    list-style: none; padding: 0; margin: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: .75rem;
+  .panel-head h1::before {
+    content: ""; display: inline-block;
+    width: .45rem; height: .45rem; margin-right: .8rem;
+    rotate: 45deg; background: var(--gold); vertical-align: middle;
   }
-  .talents li {
-    position: relative;
-    display: grid;
-    place-items: center;
-    min-height: 4.5rem;
-    padding: .5rem;
-    text-align: center;
-    font-size: .875rem;
-    letter-spacing: .02em;
+  .panel-head .hint { font-size: .8125rem; color: var(--muted); margin-left: auto; }
+
+  /* 表单元件 */
+  label.field { display: block; margin-bottom: 1rem; }
+  label.field > span {
+    display: block; font-size: .75rem; color: var(--muted);
+    letter-spacing: .1em; margin-bottom: .4rem;
+  }
+  textarea, input[type=text], input[type=number] {
+    width: 100%;
+    font: .875rem/1.6 var(--mono);
     color: var(--parchment);
+    background: var(--stone);
+    border: 1px solid var(--gold-dim);
+    padding: .7rem .8rem;
+    transition: border-color .2s;
+  }
+  textarea { min-height: 7rem; resize: vertical; display: block; }
+  textarea:focus, input:focus { outline: none; border-color: var(--gold); }
+  textarea.out { background: #171208; color: var(--gold-bright); }
+
+  .row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1rem; }
+  .row .grow { flex: 1; min-width: 8rem; }
+
+  button {
+    font: .8125rem/1 var(--sans-cn);
+    letter-spacing: .06em;
+    color: var(--parchment);
+    background: var(--stone-hi);
+    border: 1px solid var(--gold-dim);
+    padding: .55rem 1rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  button:hover { border-color: var(--gold); color: var(--gold-bright); }
+  button:focus-visible, a:focus-visible, .slot:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+  .note { font-size: .8125rem; color: var(--muted); margin: .4rem 0 0; }
+  .note.bad { color: var(--bad); }
+  .note.ok { color: var(--ok); }
+
+  /* 结果行：键值对 */
+  .kv { border-top: 1px solid #2a2219; }
+  .kv div {
+    display: flex; gap: 1rem; padding: .55rem 0;
+    border-bottom: 1px solid #2a2219;
+    font-family: var(--mono); font-size: .8125rem;
+  }
+  .kv b {
+    flex: none; width: 7rem; color: var(--muted);
+    font-weight: 400; letter-spacing: .04em;
+  }
+  .kv span { color: var(--gold-bright); word-break: break-all; }
+
+  /* 传送门链接 */
+  .portals { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .6rem; margin-bottom: 1.2rem; }
+  .portals a {
+    display: block; padding: .7rem .9rem;
+    color: var(--parchment); text-decoration: none; font-size: .875rem;
     background: linear-gradient(160deg, var(--stone-hi), var(--stone));
     border: 1px solid var(--gold-dim);
-    transition: border-color .25s, color .25s;
+    transition: border-color .2s, color .2s;
   }
-  .talents li:hover {
-    border-color: var(--gold);
-    color: var(--gold-bright);
-  }
-  /* 四角的角饰：两条伪元素各画两个角 */
-  .talents li::before,
-  .talents li::after {
-    content: "";
-    position: absolute;
-    width: .5rem; height: .5rem;
-    border: 1px solid var(--gold);
-    opacity: .55;
-  }
-  .talents li::before { top: 4px; left: 4px; border-width: 1px 0 0 1px; }
-  .talents li::after { bottom: 4px; right: 4px; border-width: 0 1px 1px 0; }
+  .portals a:hover { border-color: var(--gold); color: var(--gold-bright); }
 
-  /* ---------- 战绩：任务日志 ---------- */
-  .quests { list-style: none; padding: 0; margin: 0; }
-  .quests li {
-    padding: 1.2rem 1.2rem 1.2rem 1.4rem;
-    border-left: 3px solid var(--epic);
-    background: linear-gradient(90deg, rgba(168, 98, 232, .07), transparent 70%);
-    margin-bottom: 1rem;
-    transition: background .25s;
+  /* 底部技能栏 */
+  .bar {
+    position: relative; z-index: 1;
+    flex: none;
+    display: flex; gap: .45rem; justify-content: center;
+    padding: .8rem 1rem calc(.8rem + env(safe-area-inset-bottom));
+    background: rgba(19, 16, 12, .92);
+    border-top: 1px solid var(--gold-dim);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .quests li:hover { background: linear-gradient(90deg, rgba(168, 98, 232, .14), transparent 70%); }
-  .quests h3 {
-    font-family: var(--serif-cn);
-    font-size: 1.0625rem;
-    font-weight: 500;
-    letter-spacing: .06em;
-    margin: 0 0 .35rem;
-    color: var(--gold-bright);
-  }
-  .quests p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .bar::-webkit-scrollbar { display: none; }
 
-  /* ---------- 联系：符文按钮 ---------- */
-  .runes { display: flex; flex-wrap: wrap; gap: .9rem; }
-  .runes a {
-    padding: .7rem 1.6rem;
-    font-size: .9375rem;
-    letter-spacing: .1em;
+  .slot {
+    position: relative; flex: none;
+    width: 4.4rem; height: 4.4rem;
+    display: grid; place-items: center;
+    padding: .3rem;
+    font: inherit; font-size: .75rem; line-height: 1.3;
+    text-align: center; color: var(--muted);
+    background: linear-gradient(160deg, var(--stone-hi), var(--stone));
     border: 1px solid var(--gold-dim);
-    background: var(--stone);
-    transition: border-color .25s, box-shadow .25s, color .25s;
+    cursor: pointer;
+    transition: border-color .2s, color .2s, box-shadow .2s;
   }
-  .runes a:hover {
+  .slot:hover { color: var(--parchment); border-color: var(--gold); }
+  .slot[aria-current="true"] {
+    color: var(--gold-bright);
     border-color: var(--gold);
-    box-shadow: 0 0 16px rgba(200, 164, 92, .25);
+    box-shadow: inset 0 0 14px rgba(200, 164, 92, .22), 0 0 10px rgba(200, 164, 92, .15);
   }
-
-  footer {
-    margin-top: 6rem;
-    padding-top: 1.5rem;
-    text-align: center;
-    font-size: .8125rem;
-    color: var(--muted);
-    border-top: 1px solid transparent;
-    border-image: linear-gradient(90deg, transparent, var(--gold-dim), transparent) 1;
+  /* 角饰与快捷键角标 */
+  .slot::before {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: .45rem; height: .45rem;
+    border: 1px solid var(--gold); border-width: 1px 0 0 1px; opacity: .5;
   }
+  .slot::after {
+    content: attr(data-key);
+    position: absolute; right: 4px; bottom: 2px;
+    font-family: var(--mono); font-size: .625rem; color: var(--gold-dim);
+  }
+  .slot[aria-current="true"]::after { color: var(--gold); }
 
   @media (max-width: 34rem) {
-    .talents { grid-template-columns: repeat(2, 1fr); }
-    main { padding-bottom: 5rem; }
-    section { margin-top: 4rem; }
+    .bar { justify-content: flex-start; }
+    main { padding: 1.4rem 1rem 2rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .sigil .ring-out, .sigil .ring-in, .hero::after { animation: none; }
+    .sigil .ring-out, .sigil .ring-in { animation: none; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="hero">
-    <!-- 符文法阵：纯 SVG 描边，两层反向慢转 -->
-    <svg class="sigil" viewBox="0 0 400 400" aria-hidden="true" fill="none" stroke="currentColor">
-      <defs>
-        <path id="arc" d="M200,200 m-156,0 a156,156 0 1,1 312,0 a156,156 0 1,1 -312,0"/>
-      </defs>
-      <g class="ring-out">
-        <circle cx="200" cy="200" r="190" stroke-width="1"/>
-        <circle cx="200" cy="200" r="176" stroke-width="1" stroke-dasharray="2 10"/>
-        <text font-family="Cinzel, serif" font-weight="500" font-size="13" letter-spacing="7" fill="currentColor" stroke="none">
-          <textPath href="#arc" startOffset="2%">BUILD · SHIP · ENDURE · REFACTOR · BUILD · SHIP · ENDURE ·</textPath>
-        </text>
-      </g>
-      <g class="ring-in">
-        <circle cx="200" cy="200" r="128" stroke-width="1"/>
-        <circle cx="200" cy="200" r="96" stroke-width="1" stroke-dasharray="14 8"/>
-        <!-- 内层六芒星 -->
-        <path d="M200 76 L307 262 L93 262 Z" stroke-width="1"/>
-        <path d="M200 324 L93 138 L307 138 Z" stroke-width="1"/>
-      </g>
-    </svg>
+<svg class="sigil" viewBox="0 0 400 400" aria-hidden="true" fill="none" stroke="currentColor">
+  <defs>
+    <path id="arc" d="M200,200 m-156,0 a156,156 0 1,1 312,0 a156,156 0 1,1 -312,0"/>
+  </defs>
+  <g class="ring-out">
+    <circle cx="200" cy="200" r="190" stroke-width="1"/>
+    <circle cx="200" cy="200" r="176" stroke-width="1" stroke-dasharray="2 10"/>
+    <text font-family="Cinzel, serif" font-weight="500" font-size="13" letter-spacing="7" fill="currentColor" stroke="none">
+      <textPath href="#arc" startOffset="2%">BUILD · SHIP · ENDURE · REFACTOR · BUILD · SHIP · ENDURE ·</textPath>
+    </text>
+  </g>
+  <g class="ring-in">
+    <circle cx="200" cy="200" r="128" stroke-width="1"/>
+    <circle cx="200" cy="200" r="96" stroke-width="1" stroke-dasharray="14 8"/>
+    <path d="M200 76 L307 262 L93 262 Z" stroke-width="1"/>
+    <path d="M200 324 L93 138 L307 138 Z" stroke-width="1"/>
+  </g>
+</svg>
 
-    <div class="hero-text">
-      <h1>王云龙</h1>
-      <p class="latin">WANG YUNLONG</p>
-      <p class="class-line">后端工程师 · Java / Spring Boot</p>
-    </div>
-  </header>
+<header class="topbar">
+  <span class="brand">WORKBENCH</span>
+  <span class="clock" id="clock"></span>
+</header>
 
-  <main>
-    <section id="about">
-      <h2>档案</h2>
-      <p>这里写两三句自我介绍：现在在做什么，擅长什么方向，对什么感兴趣。先占位，内容随时换。</p>
-    </section>
+<main id="stage"></main>
 
-    <section id="talents">
-      <h2>专精</h2>
-      <ul class="talents">
-        <li>Java</li>
-        <li>Spring Boot</li>
-        <li>MyBatis-Plus</li>
-        <li>MySQL</li>
-        <li>Redis</li>
-        <li>Docker</li>
-      </ul>
-    </section>
+<nav class="bar" id="bar" aria-label="工具"></nav>
 
-    <section id="quests">
-      <h2>战绩</h2>
-      <ul class="quests">
-        <li>
-          <h3>项目名称一</h3>
-          <p>一句话说清这个项目做什么、用了什么技术、你负责哪部分。</p>
-        </li>
-        <li>
-          <h3>项目名称二</h3>
-          <p>一句话说清这个项目做什么、用了什么技术、你负责哪部分。</p>
-        </li>
-      </ul>
-    </section>
+<script>
+(() => {
+  "use strict";
 
-    <section id="contact">
-      <h2>联络</h2>
-      <div class="runes">
-        <a href="https://github.com/cole802">GitHub</a>
-        <a href="mailto:wangyunlong000802@gmail.com">Email</a>
-      </div>
-    </section>
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
 
-    <footer>© 2026 王云龙</footer>
-  </main>
+  const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-</div>
+  /* ---------- 纯函数：由页末自检覆盖 ---------- */
+
+  const b64 = {
+    encode: s => btoa(Array.from(enc.encode(s), b => String.fromCharCode(b)).join("")),
+    decode: s => dec.decode(Uint8Array.from(atob(s.trim()), c => c.charCodeAt(0))),
+  };
+
+  /** base64url 转标准 base64 并补齐后解码，用于 JWT 分段 */
+  const b64url = s => b64.decode(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "="));
+
+  /** 解析输入为 Date：纯数字按时间戳（不超过 10 位按秒），否则交给 Date */
+  function parseMoment(raw) {
+    const s = raw.trim();
+    if (!s) return null;
+    if (/^\d{1,13}$/.test(s)) {
+      const n = Number(s);
+      return new Date(s.length <= 10 ? n * 1000 : n);
+    }
+    const d = new Date(s.replace(" ", "T"));
+    return isNaN(d) ? null : d;
+  }
+
+  const pad = n => String(n).padStart(2, "0");
+
+  /** 本地时间，YYYY-MM-DD HH:mm:ss */
+  const fmt = d =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+  /** 相对此刻的描述，如「3 分钟前」 */
+  function relative(d, now = Date.now()) {
+    const diff = d.getTime() - now;
+    const units = [["year", 31536e6], ["month", 2592e6], ["day", 864e5], ["hour", 36e5], ["minute", 6e4], ["second", 1e3]];
+    const rtf = new Intl.RelativeTimeFormat("zh-CN", { numeric: "auto" });
+    for (const [unit, ms] of units) {
+      if (Math.abs(diff) >= ms || unit === "second") return rtf.format(Math.round(diff / ms), unit);
+    }
+  }
+
+  const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  const sha = async (algo, text) => hex(await crypto.subtle.digest(algo, enc.encode(text)));
+
+  /* ---------- 面板骨架 ---------- */
+
+  const field = (label, tag = "textarea", attrs = "") =>
+    `<label class="field"><span>${label}</span><${tag} ${attrs}></${tag}></label>`;
+
+  const kvRows = rows => rows.map(([k, v]) => `<div><b>${k}</b><span>${escapeHtml(v)}</span></div>`).join("");
+
+  /** 左右互转：任一侧输入，另一侧立即跟随 */
+  function converter({ left, right, toRight, toLeft }) {
+    return {
+      body: field(left, "textarea", 'data-a spellcheck="false"') +
+            field(right, "textarea", 'data-b spellcheck="false" class="out"') +
+            `<p class="note" data-err></p>`,
+      init(root) {
+        const a = $("[data-a]", root), b = $("[data-b]", root), err = $("[data-err]", root);
+        const run = (from, to, fn) => {
+          err.textContent = "";
+          if (!from.value) { to.value = ""; return; }
+          try { to.value = fn(from.value); }
+          catch (e) { to.value = ""; err.textContent = e.message; err.className = "note bad"; }
+        };
+        a.addEventListener("input", () => run(a, b, toRight));
+        b.addEventListener("input", () => run(b, a, toLeft));
+        a.focus();
+      },
+    };
+  }
+
+  function copyable(btn, getText) {
+    btn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(getText());
+      const old = btn.textContent;
+      btn.textContent = "已复制";
+      setTimeout(() => (btn.textContent = old), 1200);
+    });
+  }
+
+  /* ---------- 工具 ---------- */
+
+  const TOOLS = [
+    {
+      id: "time", name: "时间戳", hint: "纯数字按时间戳，其余交给 Date",
+      body: `<label class="field"><span>时间戳或日期</span><input type="text" data-in spellcheck="false" placeholder="1760000000 / 2026-10-17 14:30:00"></label>
+             <div class="kv" data-out></div>`,
+      init(root) {
+        const input = $("[data-in]", root), out = $("[data-out]", root);
+        const show = () => {
+          const live = !input.value.trim();
+          const d = parseMoment(input.value) ?? new Date();
+          out.innerHTML = kvRows([
+            ["秒", String(Math.floor(d.getTime() / 1000))],
+            ["毫秒", String(d.getTime())],
+            ["本地时间", fmt(d)],
+            ["ISO 8601", d.toISOString()],
+            ["相对现在", live ? "此刻" : relative(d)],
+          ]);
+        };
+        input.addEventListener("input", show);
+        show();
+        // 空输入时跟着秒走，一旦输入就停住
+        const timer = setInterval(() => { if (!input.value.trim()) show(); }, 1000);
+        root.cleanup = () => clearInterval(timer);
+        input.focus();
+      },
+    },
+    {
+      id: "json", name: "JSON", hint: "格式化 / 压缩 / 转义",
+      body: field("输入", "textarea", 'data-in spellcheck="false"') +
+            `<div class="row">
+               <button data-act="pretty">格式化</button>
+               <button data-act="min">压缩</button>
+               <button data-act="esc">转义为字符串</button>
+               <button data-act="unesc">去转义</button>
+               <button data-copy>复制结果</button>
+             </div>` +
+            field("结果", "textarea", 'data-out spellcheck="false" class="out"') +
+            `<p class="note" data-err></p>`,
+      init(root) {
+        const i = $("[data-in]", root), o = $("[data-out]", root), err = $("[data-err]", root);
+        const acts = {
+          pretty: s => JSON.stringify(JSON.parse(s), null, 2),
+          min: s => JSON.stringify(JSON.parse(s)),
+          esc: s => JSON.stringify(s),
+          unesc: s => JSON.parse(s),
+        };
+        $$("[data-act]", root).forEach(btn => btn.addEventListener("click", () => {
+          err.textContent = "";
+          try { o.value = acts[btn.dataset.act](i.value); }
+          catch (e) { o.value = ""; err.textContent = e.message; err.className = "note bad"; }
+        }));
+        copyable($("[data-copy]", root), () => o.value);
+        i.focus();
+      },
+    },
+    Object.assign({ id: "b64", name: "Base64", hint: "UTF-8 文本与 Base64 互转" },
+      converter({ left: "文本", right: "Base64", toRight: b64.encode, toLeft: b64.decode })),
+    Object.assign({ id: "url", name: "URL 编码", hint: "encodeURIComponent" },
+      converter({ left: "明文", right: "编码后", toRight: encodeURIComponent, toLeft: decodeURIComponent })),
+    {
+      id: "uuid", name: "UUID", hint: "crypto.randomUUID",
+      body: `<div class="row">
+               <input type="number" data-n value="5" min="1" max="100" style="width:5rem">
+               <button data-gen>生成</button>
+               <button data-plain>去掉横线</button>
+               <button data-copy>复制全部</button>
+             </div>` +
+            field("结果", "textarea", 'data-out spellcheck="false" class="out"'),
+      init(root) {
+        const n = $("[data-n]", root), o = $("[data-out]", root);
+        const gen = () => {
+          o.value = Array.from({ length: Math.min(Number(n.value) || 1, 100) }, () => crypto.randomUUID()).join("\n");
+        };
+        $("[data-gen]", root).addEventListener("click", gen);
+        $("[data-plain]", root).addEventListener("click", () => (o.value = o.value.replace(/-/g, "")));
+        copyable($("[data-copy]", root), () => o.value);
+        gen();
+      },
+    },
+    {
+      id: "hash", name: "哈希", hint: "SHA-1 / SHA-256 / SHA-512",
+      body: field("文本", "textarea", 'data-in spellcheck="false"') + `<div class="kv" data-out></div>`,
+      init(root) {
+        const i = $("[data-in]", root), o = $("[data-out]", root);
+        i.addEventListener("input", async () => {
+          if (!i.value) { o.innerHTML = ""; return; }
+          const algos = ["SHA-1", "SHA-256", "SHA-512"];
+          const rows = await Promise.all(algos.map(async a => [a, await sha(a, i.value)]));
+          o.innerHTML = kvRows(rows);
+        });
+        i.focus();
+      },
+    },
+    {
+      id: "jwt", name: "JWT", hint: "只解码，不验签",
+      body: field("Token", "textarea", 'data-in spellcheck="false"') +
+            `<div class="kv" data-meta></div>` +
+            field("Header", "textarea", 'data-h class="out" style="min-height:4rem"') +
+            field("Payload", "textarea", 'data-p class="out"') +
+            `<p class="note" data-err></p>`,
+      init(root) {
+        const i = $("[data-in]", root), h = $("[data-h]", root), p = $("[data-p]", root);
+        const meta = $("[data-meta]", root), err = $("[data-err]", root);
+        i.addEventListener("input", () => {
+          err.textContent = ""; meta.innerHTML = ""; h.value = p.value = "";
+          if (!i.value.trim()) return;
+          try {
+            const [a, b] = i.value.trim().split(".");
+            const header = JSON.parse(b64url(a)), payload = JSON.parse(b64url(b));
+            h.value = JSON.stringify(header, null, 2);
+            p.value = JSON.stringify(payload, null, 2);
+            const rows = [];
+            for (const [k, label] of [["iat", "签发"], ["nbf", "生效"], ["exp", "过期"]]) {
+              if (payload[k]) {
+                const d = new Date(payload[k] * 1000);
+                rows.push([label, `${fmt(d)}（${relative(d)}）`]);
+              }
+            }
+            if (payload.exp) rows.push(["状态", payload.exp * 1000 < Date.now() ? "已过期" : "有效"]);
+            meta.innerHTML = kvRows(rows);
+          } catch (e) {
+            err.textContent = "解析失败：" + e.message;
+            err.className = "note bad";
+          }
+        });
+        i.focus();
+      },
+    },
+    {
+      id: "re", name: "正则", hint: "实时匹配，列出分组",
+      body: `<div class="row">
+               <input type="text" class="grow" data-pat spellcheck="false" placeholder="正则表达式">
+               <input type="text" data-flags value="g" style="width:5rem" spellcheck="false" placeholder="flags">
+             </div>` +
+            field("测试文本", "textarea", 'data-text spellcheck="false"') +
+            `<p class="note" data-err></p><div class="kv" data-out></div>`,
+      init(root) {
+        const pat = $("[data-pat]", root), flags = $("[data-flags]", root);
+        const text = $("[data-text]", root), out = $("[data-out]", root), err = $("[data-err]", root);
+        const run = () => {
+          err.textContent = ""; out.innerHTML = "";
+          if (!pat.value) return;
+          let re;
+          const f = flags.value.includes("g") ? flags.value : flags.value + "g";
+          try { re = new RegExp(pat.value, f); }
+          catch (e) { err.textContent = e.message; err.className = "note bad"; return; }
+          const ms = [...text.value.matchAll(re)];
+          err.textContent = `${ms.length} 处匹配`;
+          err.className = "note" + (ms.length ? " ok" : "");
+          out.innerHTML = ms.slice(0, 50)
+            .map(m => [`@${m.index}`, m[0] + (m.length > 1 ? "　→　" + m.slice(1).join(" | ") : "")])
+            .reduce((acc, row) => acc + kvRows([row]), "");
+        };
+        [pat, flags, text].forEach(e => e.addEventListener("input", run));
+        pat.focus();
+      },
+    },
+    {
+      id: "portal", name: "传送门", hint: "每行「名称 | 链接」，存在本机",
+      body: `<div class="portals" data-links></div>` +
+            field("清单", "textarea", 'data-edit spellcheck="false"') +
+            `<div class="row"><button data-save>保存</button><span class="note" data-msg></span></div>`,
+      init(root) {
+        const KEY = "portals";
+        const DEFAULT = [
+          "GitHub | https://github.com/cole802",
+          "Maven Central | https://central.sonatype.com",
+          "Spring Boot 文档 | https://docs.spring.io/spring-boot/index.html",
+          "MyBatis-Plus | https://baomidou.com",
+        ].join("\n");
+        const edit = $("[data-edit]", root), box = $("[data-links]", root), msg = $("[data-msg]", root);
+        const draw = src => {
+          box.innerHTML = src.split("\n").map(line => {
+            const [name, url] = line.split("|").map(s => s.trim());
+            if (!url || !/^https?:\/\//.test(url)) return "";
+            return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(name || url)}</a>`;
+          }).join("");
+        };
+        try { edit.value = localStorage.getItem(KEY) ?? DEFAULT; } catch { edit.value = DEFAULT; }
+        draw(edit.value);
+        $("[data-save]", root).addEventListener("click", () => {
+          try { localStorage.setItem(KEY, edit.value); msg.textContent = "已保存"; msg.className = "note ok"; }
+          catch { msg.textContent = "本机存储不可用"; msg.className = "note bad"; }
+          draw(edit.value);
+          setTimeout(() => (msg.textContent = ""), 1500);
+        });
+      },
+    },
+  ];
+
+  /* ---------- 切换与键盘 ---------- */
+
+  const stage = $("#stage"), bar = $("#bar");
+
+  bar.innerHTML = TOOLS.map((t, i) =>
+    `<button class="slot" data-id="${t.id}" data-key="${i + 1}" title="${t.name}（${i + 1}）">${t.name}</button>`
+  ).join("");
+
+  function open(id) {
+    const tool = TOOLS.find(t => t.id === id) ?? TOOLS[0];
+    stage.cleanup?.();
+    stage.innerHTML =
+      `<section class="panel"><div class="panel-head"><h1>${tool.name}</h1>` +
+      `<span class="hint">${tool.hint}</span></div>${tool.body}</section>`;
+    const panel = $(".panel", stage);
+    tool.init?.(panel);
+    stage.cleanup = panel.cleanup;
+    $$(".slot", bar).forEach(s => s.setAttribute("aria-current", String(s.dataset.id === tool.id)));
+    try { localStorage.setItem("tool", tool.id); } catch {}
+  }
+
+  bar.addEventListener("click", e => {
+    const slot = e.target.closest(".slot");
+    if (slot) open(slot.dataset.id);
+  });
+
+  // 数字键直达；正在输入时不抢键
+  addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
+    const n = Number(e.key);
+    if (n >= 1 && n <= TOOLS.length) { open(TOOLS[n - 1].id); e.preventDefault(); }
+  });
+
+  let saved = null;
+  try { saved = localStorage.getItem("tool"); } catch {}
+  open(saved ?? TOOLS[0].id);
+
+  /* ---------- 顶栏时钟 ---------- */
+
+  const clock = $("#clock");
+  const tick = () => {
+    const d = new Date();
+    clock.innerHTML = `<b>${fmt(d)}</b>　${Math.floor(d.getTime() / 1000)}`;
+  };
+  tick();
+  setInterval(tick, 1000);
+
+  /* ---------- 自检：带 ?test 打开时在控制台跑一遍纯函数 ---------- */
+
+  if (location.search.includes("test")) {
+    const eq = (a, b, label) => console.assert(a === b, label, a, "≠", b);
+    eq(b64.encode("中文 abc"), "5Lit5paHIGFiYw==", "base64 编码");
+    eq(b64.decode("5Lit5paHIGFiYw=="), "中文 abc", "base64 解码");
+    eq(b64url("eyJhIjoxfQ"), '{"a":1}', "base64url 补齐");
+    eq(parseMoment("1760000000").getTime(), 1760000000000, "10 位按秒");
+    eq(parseMoment("1760000000123").getTime(), 1760000000123, "13 位按毫秒");
+    eq(parseMoment("not a date"), null, "非法输入返回 null");
+    eq(fmt(new Date(2026, 0, 2, 3, 4, 5)), "2026-01-02 03:04:05", "本地时间补零");
+    eq(relative(new Date(Date.now() - 18e4)), "3分钟前", "相对时间");
+    sha("SHA-256", "abc").then(v =>
+      eq(v, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "SHA-256"));
+    console.log("自检结束，上方无 Assertion failed 即通过");
+  }
+})();
+</script>
 </body>
 </html>
