@@ -206,12 +206,17 @@
   .card:hover::before { opacity: .6; }
 
   .ico { flex: none; width: 1.15rem; height: 1.15rem; display: grid; place-items: center; }
-  .ico img { width: 100%; height: 100%; object-fit: contain; }
+  /* 淡金描边：GitHub 这类纯黑图标在深底上才看得出轮廓 */
+  .ico img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 0 1px rgba(242, 220, 160, .9));
+  }
   .ico .letter {
     width: 100%; height: 100%;
     display: grid; place-items: center;
-    font-family: var(--latin); font-size: .6rem;
-    color: var(--gold); border: 1px solid var(--gold-dim);
+    font-family: var(--latin); font-size: .68rem; line-height: 1;
+    color: var(--gold-bright); border: 1px solid var(--gold-dim);
+    background: var(--stone);
   }
   .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
