@@ -400,6 +400,9 @@
   /* ====== 常用站点：改这里，然后 git push ======
      每项是 ["显示名", "链接"]，分类顺序就是页面顺序 */
   const LINKS = [
+    { group: "本地服务", items: [
+      ["斗鱼直播墙", "http://localhost:5101"],
+    ]},
     { group: "常用", items: [
       ["GitHub", "https://github.com"],
       ["Google", "https://www.google.com"],
@@ -449,9 +452,13 @@
         const card = (name, url) => {
           let origin = "";
           try { origin = new URL(url).origin; } catch { return ""; }
+          // http 链接（本机服务）直接用首字母：HTTPS 页面取 http 图片会被当混合内容拦掉
+          const ico = origin.startsWith("https:")
+            ? `<img src="${escapeHtml(origin)}/favicon.ico" alt="" loading="lazy">`
+            : `<span class="letter">${escapeHtml((name.trim()[0] || "?").toUpperCase())}</span>`;
           return `<a class="card" href="${escapeHtml(url)}" target="_blank" rel="noopener"
                      data-q="${escapeHtml((name + " " + url).toLowerCase())}">
-                    <span class="ico"><img src="${escapeHtml(origin)}/favicon.ico" alt="" loading="lazy"></span>
+                    <span class="ico">${ico}</span>
                     <span class="nm">${escapeHtml(name)}</span>
                   </a>`;
         };
